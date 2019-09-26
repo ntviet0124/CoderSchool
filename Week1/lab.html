@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Lab - Currency Convert</title>
+  </head>
+  <body>
+    <div class="container">
+        <div class="row">
+          <div class="col-4 offset-4">
+              <h1>Currency Convert</h1>
+              <div class="form-group">
+                <div class="custom-control custom-radio">
+                  <input type="radio" id="usd" name="unit" value="USD" class="custom-control-input" checked>
+                  <label class="custom-control-label" for="usd">USD</label>
+                </div>
+                <div class="custom-control custom-radio">
+                  <input type="radio" id="eur" name="unit" value="EUR" class="custom-control-input">
+                  <label class="custom-control-label" for="eur">EUR</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <div id="result"></div>
+              </div>
+              <div class="form-group">
+                  <input type="text" class="form-control" id="amount" placeholder="Value convert..">
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" id="btnConvert">Convert Currency</button>
+              </div>
+          </div>
+        </div>
+    </div>
+
+
+    <script>
+      let unit = document.getElementsByName('unit');
+      let btnConvert = document.getElementById('btnConvert');
+      let result = document.getElementById('result');
+
+      btnConvert.addEventListener('click', function() {
+        let amount = document.getElementById('amount').value;
+        for (let i = 0; i < unit.length; i++) {
+          if (unit[i].checked) {
+            callAPI(unit[i].value, amount);
+            break;
+          }
+        }
+      });
+
+      function callAPI(unit, amount) {
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://data.fixer.io/api/latest?access_key=3a88e6e37a58bca0817959239e927d37');
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            let rates = JSON.parse(xhr.responseText).rates;
+            if (unit == 'EUR') {
+              var vndCurrency = amount * rates.VND;
+            } else {
+              var vndCurrency = amount * (rates.VND / rates.USD);
+            }
+            result.innerHTML = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'VND' }).format(vndCurrency);
+            result.setAttribute("class", "alert alert-success");
+          } else {
+            alert('Request failed.  Returned status of ' + xhr.status);
+          }
+        };
+        xhr.send();
+      }
+    </script>
+    
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
