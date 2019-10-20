@@ -22,8 +22,6 @@ export default function AllScreen(props) {
   const [todoList, setTodoList] = useState(TODOS);
   const [todoBody, setTodoBody] = useState('');
 
-  props.navigation.navigate('Complete', {todoList: todoList});
-
   const onToggleTodo = id => {
     const todo = todoList.find(todo => todo.id === id);
     todo.status = todo.status === 'Done' ? 'Active' : 'Done';
