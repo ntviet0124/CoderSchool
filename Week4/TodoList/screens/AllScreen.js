@@ -11,7 +11,8 @@ import {
   StatusBar,
   ImageBackground,
   KeyboardAvoidingView,
-  Dimensions
+  Dimensions,
+  // AsyncStorage
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { TODOS } from '../utils/data.js';
@@ -22,6 +23,14 @@ export default function AllScreen(props) {
   const [todoList, setTodoList] = useState(TODOS);
   const [todoBody, setTodoBody] = useState('');
 
+  /* _storeData = async (todoList) => {
+    try {
+      await AsyncStorage.setItem('todoList', todoList);
+    } catch (error) {
+      console.log(error);
+    }
+  }; */
+
   const onToggleTodo = id => {
     const todo = todoList.find(todo => todo.id === id);
     todo.status = todo.status === 'Done' ? 'Active' : 'Done';
@@ -29,6 +38,7 @@ export default function AllScreen(props) {
     todoList[foundIndex] = todo;
     const newTodoList = [...todoList];
     setTodoList(newTodoList);
+    // _storeData(newTodoList);
 
     setTimeout(() => {
       props.navigation.navigate('SingleTodo', {
@@ -40,6 +50,7 @@ export default function AllScreen(props) {
   const onDeleteTodo = id => {
     const newTodoList = todoList.filter(todo => todo.id !== id);
     setTodoList(newTodoList);
+    // _storeData(newTodoList);
   };
 
   const onLongPress = todo => {
@@ -67,6 +78,7 @@ export default function AllScreen(props) {
     };
     const newTodoList = [...todoList, newTodo];
     setTodoList(newTodoList);
+    // _storeData(newTodoList);
     setTodoBody('');
   };
 
