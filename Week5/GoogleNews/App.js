@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import {
   View,
@@ -22,11 +22,10 @@ export default function App() {
 
   const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState([]);
+  const [oldArticles, setOldArticles] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
-  const [searchTitle, setSearchTitle] = useState('');
   const [hasErrored, setHasApiError] = useState(false);
   const [lastPageReached, setLastPageReached] = useState(false);
-  const inputRef = useRef();
 
   const filterForUniqueArticles = arr => {
     const cleaned = [];
@@ -53,6 +52,7 @@ export default function App() {
           articles.concat(jsonData.articles)
         );
         setArticles(newArticleList);
+        setOldArticles(newArticleList);
         setPageNumber(pageNumber + 1);
       } else {
         setLastPageReached(true);
@@ -70,22 +70,20 @@ export default function App() {
   
   const searchNews = async (search) => {
     if (search != '') {
-      // const newArticleList = articles.filter((item) => {
-      //   return item.title.toUpperCase().indexOf(search.toUpperCase()) > -1;
-      // });
-      const response = await fetch(`https://newsapi.org/v2/everything?q=${search}&apiKey=6eec2f7fe6cd4c40a3fef8f33f5778fe`);
-      const jsonData = await response.json();
+      const newArticleList = articles.filter((item) => {
+        return item.title.toLowerCase().indexOf(search.toLowerCase()) > -1;
+      });
       setArticles(newArticleList);
     }else {
-
+      setArticles(oldArticles);
     }
   }
 
   const renderArticleItem = ({ item }) => {
     return(
-      <View style={{ paddingHorizontal: 20, marginVertical: 20 }}>
-        <View style={{ width: '100%', height: 250, borderRadius: 12, backgroundColor: '#ababab', marginBottom: 10 }}>
-          <Image source={{ uri: item.urlToImage }} style={{ width: '100%', height: 250, borderRadius: 12 }} resizeMode="cover" />
+      <View style={styles.articleItem}>
+        <View style={styles.articleImageHolder}>
+          <Image source={{ uri: item.urlToImage }} style={styles.articleImage} resizeMode="cover" />
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Source</Text>
@@ -93,11 +91,13 @@ export default function App() {
             <Text style={styles.info}>{item.source.name}</Text>
           </TouchableOpacity>
         </View>
-        <Text style={{ fontSize: 20, color: '#fff', fontWeight: '500', marginVertical: 10 }}>{item.title}</Text>
+        <TouchableOpacity onPress={() => onPress(item.url)}>
+          <Text style={styles.articleTitle}>{item.title}</Text>
+        </TouchableOpacity>
         <View style={styles.row}>
           <Text style={styles.label}>Published</Text>
           <Text style={styles.info}>
-            {moment(item.publishedAt).format('LLL')}
+            {moment(item.publishedAt).startOf('hour').fromNow()}
           </Text>
         </View>
       </View>
@@ -136,11 +136,10 @@ export default function App() {
         <Text style={styles.info}>{articles.length}</Text>
       </View>
 
-      <View style={{ backgroundColor: '#192433', paddingVertical: 10, width: '100%' }}>
-        <View style={{ backgroundColor: '#151d28', marginHorizontal: 20, borderRadius: 25 }}>
+      <View style={styles.wrapSearchInput}>
+        <View style={styles.bgSearchInput}>
           <TextInput
-            style={{ height: 45, paddingHorizontal: 20 }}
-            ref={inputRef}
+            style={styles.sizeSearchInput}
             placeholder="Search.."
             placeholderTextColor="#fff"
             color="#fff"
@@ -156,9 +155,17 @@ export default function App() {
         onEndReachedThreshold={1}
         renderItem={renderArticleItem}
         keyExtractor={(item) => item.title}
-        /* ListHeaderComponent={renderHeader}
-        stickyHeaderIndices={[0]} */
-        ListFooterComponent={lastPageReached ? <Text>No more articles</Text> : <ActivityIndicator size="large" loading={loading} />}
+        ListFooterComponent={lastPageReached ? 
+        <View style={styles.listFooter}>
+          <Text style={styles.listFooterContent}>No more articles</Text>
+        </View>
+        :
+        <ActivityIndicator size="large" loading={loading} />
+        }
+        /*
+        ListHeaderComponent={renderHeader}
+        stickyHeaderIndices={[0]}
+        */
       />
     </SafeAreaView>
   );
@@ -194,5 +201,52 @@ const styles = StyleSheet.create({
   info: {
     fontSize: 16,
     color: '#ababab'
-  }
+  },
+  articleItem: {
+    paddingHorizontal: 20,
+    marginVertical: 20
+  },
+  articleImageHolder: {
+    width: '100%',
+    height: 250,
+    borderRadius: 12,
+    backgroundColor: '#ababab',
+    marginBottom: 10
+  },
+  articleImage: {
+    width: '100%',
+    height: 250,
+    borderRadius: 12
+  },
+  articleTitle: {
+    fontSize: 20,
+    color: '#fff',
+    fontWeight: '500',
+    marginVertical: 10
+  },
+  wrapSearchInput: {
+    backgroundColor: '#192433',
+    paddingVertical: 10,
+    width: '100%'
+  },
+  bgSearchInput: {
+    backgroundColor: '#151d28',
+    marginHorizontal: 20,
+    borderRadius: 25
+  },
+  sizeSearchInput: {
+    height: 45,
+    paddingHorizontal: 20
+  },
+  listFooter: {
+    backgroundColor: '#151d28',
+    marginHorizontal: 20,
+    borderRadius: 12
+  },
+  listFooterContent: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 16,
+    padding: 10
+  },
 });
